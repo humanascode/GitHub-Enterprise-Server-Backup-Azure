@@ -1,0 +1,55 @@
+#!/usr/bin/env bash
+
+set -e
+
+# check if any files exist in the /mnt/data/restore folder and if so, pick the latest file and extract it to the data folder
+echo "## check if any files exist in the /mnt/data folder and if so, pick the latest file and extract it to the data folder"
+if [ "$(ls -A /mnt/data/restore)" ]; then
+  latest_file=$(ls -t /mnt/data/restore/ | head -1)
+  mkdir -p data/$latest_file
+  tar -xvf /mnt/data/restore/$latest_file -C data/$latest_file > /dev/null
+  cd /backup-utils/data/
+  ln -s "$latest_file" "current"
+  cd /backup-utils
+fi
+
+echo "### logging in to Azure"
+az login --identity --verbose
+echo "### Setting the subscription"
+az account set --subscription $SUBSCRIPTION_ID 
+
+echo "### Getting the secret from Azure Key Vault"
+
+# Get Secret from KV - Private Key
+vault_name=$KEY_VAULT_NAME
+secret_name=$SECRET_NAME
+
+mkdir -p /root/.ssh
+az keyvault secret show --name $secret_name --vault-name $vault_name --query value -o tsv > /root/.ssh/id_rsa
+chmod 600 /root/.ssh/id_rsa
+
+# Get Secret from KV - Host Key
+
+echo "### Getting the host key from Azure Key Vault"
+secret_name=$GH_HOST_KEY_SECRET_NAME
+az keyvault secret show --name $secret_name --vault-name $vault_name --query value -o tsv > /root/.ssh/known_hosts
+chmod 644 /root/.ssh/known_hosts
+
+echo "### preparing the config file"
+
+# Prepare backup.config file
+cp /backup-utils/backup.config-example /backup-utils/backup.config
+NEW_HOSTNAME=$GHE_HOSTNAME
+sed -i "s/^GHE_HOSTNAME=\".*\"/GHE_HOSTNAME=\"$NEW_HOSTNAME\"/" /backup-utils/backup.config
+
+# check if data folder exists and if not, create it
+echo "check if data folder exists and if not, create it"
+if [ ! -d data ]; then
+  mkdir data
+fi
+
+
+# Running the restore script
+echo "### Running the restore script"
+cd /backup-utils/bin/
+bash ./ghe-restore -c $GHE_HOSTNAME

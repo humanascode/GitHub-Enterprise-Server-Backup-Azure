@@ -1,0 +1,64 @@
+#!/usr/bin/env bash
+
+set -e
+
+echo "### logging in to Azure"
+az login --identity --verbose
+echo "### Setting the subscription"
+az account set --subscription $SUBSCRIPTION_ID 
+
+echo "### Getting the secret from Azure Key Vault"
+
+# Get Secret from KV - Private Key
+vault_name=$KEY_VAULT_NAME
+secret_name=$SECRET_NAME
+
+mkdir -p /root/.ssh
+az keyvault secret show --name $secret_name --vault-name $vault_name --query value -o tsv > /root/.ssh/id_rsa
+chmod 600 /root/.ssh/id_rsa
+
+# Get Secret from KV - Host Key
+
+echo "### Getting the host key from Azure Key Vault"
+secret_name=$GH_HOST_KEY_SECRET_NAME
+az keyvault secret show --name $secret_name --vault-name $vault_name --query value -o tsv > /root/.ssh/known_hosts
+chmod 644 /root/.ssh/known_hosts
+
+echo "### preparing the config file"
+
+# Prepare backup.config file
+cp /backup-utils/backup.config-example /backup-utils/backup.config
+NEW_HOSTNAME=$GHE_HOSTNAME
+sed -i "s/^GHE_HOSTNAME=\".*\"/GHE_HOSTNAME=\"$NEW_HOSTNAME\"/" /backup-utils/backup.config
+
+
+# Running the backup script
+echo "### Running the backup script"
+cd /backup-utils/bin/
+bash ./ghe-backup
+
+
+GHE_SNAPSHOT_TIMESTAMP=$(ls -lt /backup-utils/data/ | grep "^d" | head -n 1 | awk '{print $NF}')
+
+
+# archive the contents of the data directory with tar
+echo "### Archiving the contents of the data directory with tar"
+tar -czf /mnt/data/$GHE_SNAPSHOT_TIMESTAMP.tar.gz -C /backup-utils/data/$GHE_SNAPSHOT_TIMESTAMP .
+
+# Delete any files under /mnt/data that are older than $DAYS_RETENTION
+echo "### Deleting files older than $DAYS_RETENTION days from /mnt/data"
+backup_count=$(find /mnt/data -type f | wc -l)
+if [ $backup_count -gt $MIN_BACKUP_NUM ]; then
+  find /mnt/data -type f -mmin +$((DAYS_RETENTION * 1440)) | while read -r file; do
+    echo "### Deleting file: $file"
+    if [ $(find /mnt/data -type f | wc -l) -gt $MIN_BACKUP_NUM ]; then
+      rm -f "$file"
+      backup_count=$((backup_count - 1))
+    else
+      echo "### Minimum number of backups ($MIN_BACKUP_NUM) reached. Stopping deletion."
+      break
+    fi
+  done
+else
+  echo "### Minimum number of backups ($MIN_BACKUP_NUM) not reached. Skipping deletion."
+fi
