@@ -21,7 +21,7 @@ Here is a high-level drawing of the architecture:
 2. The Azure Container Instance pulls the image from the Azure Container Registry and runs it. It then pulls the required keys from the Azure Key Vault.
 3. The backup script runs and creates a full backup of the GitHub Enterprise Server instance.
 4. The backup is Archived and uploaded to Azure Files.
-> **Why is the backup Tarred?** Well, Azure files SMB file shares dont support Linux-style symbolice links, So we cant use the mounted volume to store the backup. Instead, the backup is saved locally in the container and then tarred and uploaded to Azure Files.
+> **Why is the backup Tarred?** Well, Azure files SMB file shares dont support Linux-style symbolice links, So we cant use the mounted volume to store the backup. Instead, the backup is saved locally in the container and then tarred and uploaded to Azure Files.  
 > **Why Azure Files Then?** Azure Files is currently the only supported volume type for Azure Container Instances. Instaed of giving up on the idea of using Azure Container Instances, we can use Azure Files to store the backup in an archived format.
 
 ## Prerequisites
