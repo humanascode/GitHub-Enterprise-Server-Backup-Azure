@@ -11,7 +11,7 @@ crash.*.log
 
 # DrawIO files
 *.drawio
-drawio.bkp
+*.drawio.bkp
 
 # TEMP IGNORE ALL .tf files
 *.tf
