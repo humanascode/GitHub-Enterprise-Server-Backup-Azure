@@ -22,6 +22,7 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
+  # Build job
   build:
     runs-on: ubuntu-latest
     steps:
@@ -32,21 +33,20 @@ jobs:
       - name: Build with Jekyll
         uses: actions/jekyll-build-pages@v1
         with:
-          source: ./  # Source directory of your Jekyll project
-          destination: ./_site  # Output directory of your Jekyll build
-      - name: Make a writable copy of _site
-        run: cp -r ./_site ./_site_temp
+          source: ./
+          destination: ./_site
+      - name: Ensure permissions for _site directory
+        run: chmod -R u+w ./_site
+
       - name: Inject Google Site Verification Meta Tag
         run: |
           META_TAG='<meta name="google-site-verification" content="s3J97KXtCfLqVJQGhCq76lVYEA4-2tu6AdVJss0eb_0" />'
-          find ./_site_temp -name "*.html" -exec sed -i "s|</head>|$META_TAG\n</head>|g" {} +
-      - name: Replace original _site directory
-        run: |
-          rm -rf ./_site
-          mv ./_site_temp ./_site
+          find ./_site -name "*.html" -exec sudo sed -i "s|</head>|$META_TAG\n</head>|g" {} +
+
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
 
+  # Deployment job
   deploy:
     environment:
       name: github-pages
