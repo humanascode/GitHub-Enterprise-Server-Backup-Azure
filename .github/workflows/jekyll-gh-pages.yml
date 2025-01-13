@@ -35,6 +35,10 @@ jobs:
         with:
           source: ./
           destination: ./_site
+      - name: Inject Google Site Verification Meta Tag
+        run: |
+          META_TAG='<meta name="google-site-verification" content="s3J97KXtCfLqVJQGhCq76lVYEA4-2tu6AdVJss0eb_0" />'
+          find ./_site -name "*.html" -exec sed -i "s|</head>|$META_TAG\n</head>|g" {} +
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
 
