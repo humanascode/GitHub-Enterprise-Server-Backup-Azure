@@ -57,7 +57,7 @@ https://github.com/github/backup-utils/releases
     CMD ["sh", "/backup-utils/bin/init-backup"]
     ```
     This is our wrapper script that prepares the environment and calls the backup script.
-9. Copy the init-backup and init-restore scripts from this repository to the `bin` folder. These are our wrappers.
+9. Copy the [init-backup](./init-backup) and [init-restore](./init-restore) scripts from this repository to the `bin` folder. These are our wrappers.
 10. Create an Azure Container Registry (if you don't have one already):
     ```bash
     az acr create --resource-group <resource-group-name> --name <acr-name> --sku <Basic | Standard | Premium>
