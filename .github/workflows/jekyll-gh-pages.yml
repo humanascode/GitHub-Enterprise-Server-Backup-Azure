@@ -35,8 +35,6 @@ jobs:
         with:
           source: ./
           destination: ./_site
-      - name: Ensure permissions for _site directory
-        run: chmod -R u+w ./_site
 
       - name: Inject Google Site Verification Meta Tag
         run: |
