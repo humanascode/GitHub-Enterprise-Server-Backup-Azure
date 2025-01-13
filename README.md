@@ -1,5 +1,7 @@
 # Azure-Based GitHub Enterprise Server Backup and Restore
 
+> This is a friendly view of the README, The full repo is here: [GitHub](https://github.com/humanascode/GitHub-Enterprise-Server-Backup-Azure)
+
 This repo contains the scripts and methods to configure a backup and restore process for GitHub Enterprise Server using Azure Container Instances and Azure Files.
 It provides a serverless solution to backup and restore GitHub Enterprise Server instances Which is cost-effective and easy to manage and upgrade.
 
