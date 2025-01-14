@@ -40,6 +40,15 @@ jobs:
         run: |
           META_TAG='<meta name="google-site-verification" content="BOnYgTIPG_iGNyQQY86ezzSMWxMEtGVHjDueS-sE79k" />'
           find ./_site -name "*.html" -exec sudo sed -i "s|</head>|$META_TAG\n</head>|g" {} +
+      - name: Upload Favicon
+        run: |
+          echo "Uploading favicon to the build directory"
+          cp /images/favicon.ico ./_site/favicon.ico
+
+      - name: Inject Favicon Link
+        run: |
+          FAVICON_TAG='<link rel="icon" href="/favicon.ico" type="image/x-icon">'
+          find ./_site -name "*.html" -exec sudo sed -i "s|</head>|$FAVICON_TAG\n</head>|g" {} +
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
