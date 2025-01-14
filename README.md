@@ -1,4 +1,4 @@
-# Azure-Based GitHub Enterprise Server Backup and Restore
+# GitHub Enterprise Server Backup and Restore on Azure
 
 > This is a friendly view of the README, The full repo is here: [GitHub](https://github.com/humanascode/GitHub-Enterprise-Server-Backup-Azure)
 
