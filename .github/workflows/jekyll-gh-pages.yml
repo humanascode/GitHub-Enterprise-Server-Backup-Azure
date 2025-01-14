@@ -48,7 +48,7 @@ jobs:
       - name: Inject Favicon Link
         run: |
           FAVICON_TAG='<link rel="icon" href="/GitHub-Enterprise-Server-Backup-Azure/favicon.ico" type="image/x-icon">'
-          find ./_site -name "*.html" -exec sed -i "s|</head>|$FAVICON_TAG\n</head>|g" {} +
+          find ./_site -name "*.html" -exec sudo sed -i "s|</head>|$FAVICON_TAG\n</head>|g" {} +
         
 
       - name: Upload artifact
