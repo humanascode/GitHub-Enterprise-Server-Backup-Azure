@@ -43,7 +43,7 @@ jobs:
       - name: Upload Favicon
         run: |
           echo "Uploading favicon to the build directory"
-          cp ./images/favicon.ico ./_site/favicon.ico
+          sudo cp ./images/favicon.ico ./_site/favicon.ico
 
       - name: Inject Favicon Link
         run: |
